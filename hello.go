@@ -2,10 +2,14 @@ package main
 
 import (
 	"fmt"
-	"net/http"
-	"net"
 	"log"
+	"net"
+	"net/http"
 )
+
+func byeHandler(w http.ResponseWriter, req *http.Request) {
+	fmt.Fprintln(w, "bye")
+}
 
 func helloHandler(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintln(w, "hello")
@@ -33,4 +37,7 @@ func makeServer() {
 func main() {
 	fmt.Println("hello")
 	makeServer()
+	http.HandleFunc("/hello", helloHandler)
+	http.HandleFunc("/bye", byeHandler)
+	http.ListenAndServe(":50000", nil)
 }
