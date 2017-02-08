@@ -12,6 +12,7 @@ import (
 
 func byeHandler(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintln(w, "bye")
+	fmt.Fprintln(w, "bye")
 }
 
 func helloHandler(w http.ResponseWriter, req *http.Request) {
