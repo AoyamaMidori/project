@@ -17,6 +17,11 @@ func timeHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, time.Now())
 }
 
+func ipHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/plain; charset-utf8")
+	w.WriteHeader(200)
+	fmt.Fprintln(w, r.RemoteAddr)
+}
 func byeHandler(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintln(w, "bye")
 	fmt.Fprintln(w, "bye")
