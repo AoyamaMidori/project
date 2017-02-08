@@ -22,6 +22,7 @@ func ipHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 	fmt.Fprintln(w, r.RemoteAddr)
 }
+
 func byeHandler(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintln(w, "bye")
 	fmt.Fprintln(w, "bye")
@@ -83,6 +84,8 @@ func makeServer() {
 	http.HandleFunc("/hello", helloHandler)
 	http.HandleFunc("/version", versionHandler)
 	http.HandleFunc("/bye", byeHandler)
+	http.HandleFunc("/time", timeHandler)
+	http.HandleFunc("/ip", ipHandler)
 
 	if !clipboard.Unsupported {
 		http.HandleFunc("/cb", clipboardHandler)
