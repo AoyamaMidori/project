@@ -6,9 +6,16 @@ import (
 	"net"
 	"net/http"
 	"runtime"
+	"time"
 
 	"github.com/atotto/clipboard"
 )
+
+func timeHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/plain; charset-utf8")
+	w.WriteHeader(200)
+	fmt.Fprintln(w, time.Now())
+}
 
 func byeHandler(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintln(w, "bye")
