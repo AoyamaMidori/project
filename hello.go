@@ -1,15 +1,21 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net"
 	"net/http"
+	"os/exec"
 	"runtime"
 	"time"
 
 	"github.com/atotto/clipboard"
 )
+
+var useCopy = flag.Bool("copy", true, "server url will be copied into the clipbaord.")
+
+var useAutoOpen = flag.Bool("autoopen", false, "launched server will be opened on your web browser")
 
 func timeHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain; charset-utf8")
@@ -78,6 +84,14 @@ func listenOnPortAvailable() (net.Listener, string) {
 	return ln, port
 }
 
+func startFile(command string, args ...string) error {
+	argv := make([]string, len(args)+3)
+	argv = append(argv, "/c", "start")
+	argv = append(argv, args...)
+	argv = append(argv, command)
+	return exec.Command("cmd", argv...).Run()
+}
+
 func makeServer() {
 	ln, port := listenOnPortAvailable()
 	fmt.Println("server is launched on port", port)
@@ -91,7 +105,22 @@ func makeServer() {
 		http.HandleFunc("/cb", clipboardHandler)
 	}
 
+	url := "http://localhost:" + port
+	if *useCopy && !clipboard.Unsupported {
+		err := clipboard.WriteAll(url)
+		if err == nil {
+			fmt.Println("server url is copied")
+		}
+	}
+	if *useAutoOpen {
+		startFile(url)
+	}
+
 	http.Serve(ln, nil)
+}
+
+func onWin() bool {
+	return runtime.GOOS == "windows"
 }
 
 func main() {
