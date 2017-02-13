@@ -1,13 +1,17 @@
 package main
 
 import (
+	"crypto/rand"
+	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"net/http"
 	"os/exec"
 	"runtime"
+	"strconv"
 	"time"
 
 	"github.com/atotto/clipboard"
@@ -70,6 +74,27 @@ func clipboardHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Fprintln(w, data)
+}
+
+func randomHandler(w http.ResponseWriter, r *http.Request) {
+	n, err := strconv.Itoa(r.URL.Query().Get("n"))
+	if err != nil {
+		n = 32
+	}
+	if n > 1024 {
+		n = 1024
+	}
+
+	b := make([]byte, n)
+	_, err = rand.Read(b)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	json.NewEncoder(w).Encode(b)
 }
 
 func listenOnPortAvailable() (net.Listener, string) {
