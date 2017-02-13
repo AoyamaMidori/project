@@ -6,6 +6,8 @@ import (
 	"net"
 	"net/http"
 	"runtime"
+
+	"github.com/atotto/clipboard"
 )
 
 func byeHandler(w http.ResponseWriter, req *http.Request) {
@@ -31,6 +33,25 @@ func versionHandler(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+func clipboardHandler(w http.ResponseWriter, r *http.Request) {
+	data, err := clipboard.ReadAll()
+	if err != nil {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		fmt.Fprintln(w, err)
+		return
+	}
+
+	// If query type is specified in query string, Content-Type header
+	// is set to the type. Otherwise, Content-Type will be determined
+	// by DetectContentType function.
+	typ := r.URL.Query().Get("type")
+	if typ != "" {
+		w.Header().Set("Content-Type", typ)
+	}
+
+	fmt.Fprintln(w, data)
+}
+
 func listenOnPortAvailable() (net.Listener, string) {
 	ln, err := net.Listen("tcp", "localhost:")
 	if err != nil {
@@ -48,13 +69,16 @@ func makeServer() {
 	fmt.Println("server is launched on port", port)
 	http.HandleFunc("/hello", helloHandler)
 	http.HandleFunc("/version", versionHandler)
+	http.HandleFunc("/bye", byeHandler)
+
+	if !clipboard.Unsupported {
+		http.HandleFunc("/cb", clipboardHandler)
+	}
+
 	http.Serve(ln, nil)
 }
 
 func main() {
 	fmt.Println("hello")
 	makeServer()
-	http.HandleFunc("/hello", helloHandler)
-	http.HandleFunc("/bye", byeHandler)
-	http.ListenAndServe(":50000", nil)
 }
