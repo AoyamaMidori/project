@@ -97,6 +97,45 @@ func randomHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(b)
 }
 
+func primeHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(200)
+
+	q := r.URL.Query()
+	bits, err := strconv.Itoa(q.Get("bits"))
+	if err != nil {
+		bits = 8
+	}
+	if bits < 2 {
+		fmt.Fprintln(w, "bits must be greater than 2")
+		return
+	}
+	if bits > 1024 {
+		bits = 1024
+	}
+
+	v := interpretBool(q.Get("v"))
+	t := time.Now()
+
+	p, err := rand.Prime(rand.Reader, bits)
+	if err != nil {
+		fmt.Fprintln(w, err)
+		return
+	}
+
+	fmt.Fprintln(w, p)
+}
+
+var interpretedBool = map[string]bool{
+	"true": true,
+	"yes":  true,
+	"on":   true,
+	"1":    true,
+}
+
+func interpretBool(s string) bool {
+	return interpretedBool[s]
+}
+
 func listenOnPortAvailable() (net.Listener, string) {
 	ln, err := net.Listen("tcp", "localhost:")
 	if err != nil {
